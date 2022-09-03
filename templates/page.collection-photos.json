@@ -1,0 +1,28 @@
+{
+    "sections": {
+      "main": {
+        "type": "page-template",
+        "settings": {
+        }
+      },
+      "1661876967a5fe08dd": {
+        "type": "page__collection-photos",
+        "settings": {
+          "text-color": "",
+          "photos-background-color": "",
+          "width": "standard",
+          "padding_top": 20,
+          "padding_bottom": 20,
+          "padding_left": 0,
+          "padding_right": 0,
+          "animation": "none",
+          "css_class": "",
+          "custom_css": ""
+        }
+      }
+    },
+    "order": [
+      "main",
+      "1661876967a5fe08dd"
+    ]
+  }

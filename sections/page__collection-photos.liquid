@@ -1,0 +1,279 @@
+{%- assign id = section.id -%}
+
+{% comment %} Section specific CSS {% endcomment %}
+{%- capture section_css -%}
+
+.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.photo { display: flex; flex-direction: column; margin: 10px; }
+.photo div { color: {{ section.settings.text-color }}; }
+
+{%- endcapture -%}
+
+{% style %}
+#shopify-section-{{ id }} {
+padding-top: {{ section.settings.padding_top }}px;
+padding-bottom: {{ section.settings.padding_bottom }}px;
+padding-left: {{ section.settings.padding_left }}px;
+padding-right: {{ section.settings.padding_right }}px;
+{% if section.settings.width == 'wide' %}
+width: 100%;
+{% elsif section.settings.width == 'half' %}
+width: 50%;
+{% endif %}
+}
+
+  .no-photo { color: red; font-size: 38px; }
+  .pagination-list li::marker { display: none; color: white; }
+  .photo { height: 640px; 
+          width: 520px; 
+          background-color: #eeeeee;    
+          display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: center;}
+
+    .aspect-ratio-good { background-color: #c3f6c3; }
+    .aspect-ratio-bad { background-color: #f6c3dd; }
+
+{%
+    render 'css-loop',
+css: section_css,
+id: id
+%}
+
+{%
+    render 'css-loop',
+css: section.settings.custom_css,
+id: id
+%}
+
+{% endstyle %}
+
+{% comment %} HTML markup {% endcomment %}
+<section class="featured-video
+                section
+                {{ section.settings.css_class }}
+                is-width-{{ section.settings.width }}
+                {% if section.settings.mobile_text_below_video == true %}
+                mobile-text--below-media
+                {% else %}
+                mobile-text--over-media
+                {% endif %}
+                {% if video_exists %} has-video-added {% endif %}
+                video-controls-enabled--{{ section.settings.controls }}"
+         {% if section.settings.animation != "none" %}
+         data-scroll-class="{{ section.settings.animation }}"
+         {% endif %}>
+  <div class="container
+              video__container
+              {% if section.settings.width == 'wide' or section.settings.width == 'half' %}
+              equal-columns--outside-trim
+              {% endif %}">
+    <div class="one-whole column content">
+
+      <div class="product-photos">
+
+        {% paginate collections by 48 %}
+          
+        {% for collection in collections %}
+        {% assign aspect-ratio = collection.image.aspect_ratio | times: 1 | round: 3 %}
+        {% assign aspect-ratio-featured = collection.featured_image.aspect_ratio | times: 1 | round: 3 %}
+        <h3><a href="/admin/collections/{{collection.id}}" target="_blank">{{collection.title}}</a></h3>
+        <div class="photos">
+          <div class="photo {% if collection.image %}{% if aspect-ratio == 1.000 %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}{% endif %}">
+          <h3>{% raw %}{{ collection.image }}{% endraw %}</h3>
+            {% if collection.image %}
+            <div><img src="{{ collection.image.src | img_url: '500x500' }}"></div>
+            <div>Dimensions: {{ collection.image.height }}px X {{ collection.image.width }}px</div>
+            <div>Aspect Ratio: {{ aspect-ratio }}</div>
+                        {% if aspect-ratio > 1.000 %}
+              <div>Need to crop sides</div>
+            {%  elsif aspect-ratio < 1.000 %}
+              <div>Need to crop top and bottom</div>
+              {% endif %}
+              {% else %}
+              <p class="no-photo">No Collection Image</p>
+              {% endif %}
+          </div>
+          <div class="photo {% if aspect-ratio-featured == 1.000 %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}">
+            <h3>{% raw %}{{ collection.featured_image }}{% endraw %}</h3>
+            <div><img src="{{ collection.featured_image.src | img_url: '500x500' }}"></div>
+            <div>Dimensions: {{ collection.featured_image.height }}px X {{ collection.featured_image.width }}px</div>
+            <div>Aspect Ratio: {{ collection.featured_image.aspect_ratio | round: 3 }}</div>
+                        {% if aspect-ratio-featured > 1.0 %}
+              <div>Need to crop sides</div>
+            {%  elsif aspect-ratio-featured < 1.0 %}
+              <div>Need to crop top and bottom</div>
+              {% endif %}
+          </div>
+        </div>
+        {% endfor %}        
+
+
+        <div class="container container--pagination">
+          <div class="one-whole column text-align-center">
+            {%- assign load_more_text = 'collections.general.pagination_button' | t -%}
+            {% render 'pagination',
+                  paginate: paginate,
+            pagination_type: basic_pagination,
+            load_more_text: load_more_text
+            %}
+          </div>
+        </div>    
+
+        {% endpaginate %}
+
+      </div> 
+
+    </div>
+  </div>
+
+</section>
+
+
+{% schema %}
+{
+"name": "Collection photos",
+"class": "product-photos-section overlaid-header-option",
+"settings": [
+{
+"type": "header",
+"content": "Section headings"
+},
+{
+"type": "color",
+"id": "text-color",
+"label": "Text"
+},
+{
+"type": "color",
+"id": "photos-background-color",
+"label": "Background"
+},
+
+
+
+{
+"type": "header",
+"content": "Layout"
+},
+{
+"type": "select",
+"id": "width",
+"label": "Width",
+"default": "wide",
+"options": [
+{
+"value": "half",
+"label": "Half"
+},
+{
+"value": "standard",
+"label": "Standard"
+},
+{
+"value": "wide",
+"label": "Wide"
+}
+]
+},
+{
+"type": "range",
+"id": "padding_top",
+"label": "Top spacing",
+"min": 0,
+"max": 80,
+"default": 20,
+"unit": "px"
+},
+{
+"type": "range",
+"id": "padding_bottom",
+"label": "Bottom spacing",
+"min": 0,
+"max": 80,
+"default": 0,
+"unit": "px"
+},
+{
+"type": "range",
+"id": "padding_left",
+"label": "Left spacing",
+"min": 0,
+"max": 80,
+"default": 0,
+"unit": "px"
+},
+{
+"type": "range",
+"id": "padding_right",
+"label": "Right spacing",
+"default": 0,
+"min": 0,
+"max": 80,
+"unit": "px"
+},
+{
+"type": "select",
+"id": "animation",
+"label": "Animation",
+"default": "none",
+"options": [
+{
+"value": "none",
+"label": "None"
+},
+{
+"value": "fadeIn",
+"label": "Fade in"
+},
+{
+"value": "fadeInDown",
+"label": "Fade in down"
+},
+{
+"value": "fadeInLeft",
+"label": "Fade in left"
+},
+{
+"value": "fadeInRight",
+"label": "Fade in right"
+},
+{
+"value": "slideInLeft",
+"label": "Slide in left"
+},
+{
+"value": "slideInRight",
+"label": "Slide in right"
+},
+{
+"value": "zoomIn",
+"label": "Zoom in"
+}
+]
+},
+{
+"type": "header",
+"content": "Advanced",
+"info": "[Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360022329373)"
+},
+{
+"type": "text",
+"id": "css_class",
+"label": "CSS Class"
+},
+{
+"type": "textarea",
+"id": "custom_css",
+"label": "Custom CSS"
+}
+],
+
+"presets": [{
+"name": "Collection photos",
+"category": "JadePuma"
+}]
+}
+
+{% endschema %}
