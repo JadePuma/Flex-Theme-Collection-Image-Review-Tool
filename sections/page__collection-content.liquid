@@ -11,7 +11,7 @@ Last editted - 18Sep22
 {% comment %} Section specific CSS {% endcomment %}
 {%- capture section_css -%}
 
-.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
 .photo { display: flex; flex-direction: column; margin: 10px; }
 .photo div { color: {{ section.settings.text-color }}; }
 
