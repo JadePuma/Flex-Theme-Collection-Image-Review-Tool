@@ -1,3 +1,11 @@
+{% comment %}
+ 
+Custom section created by JadePuma
+Instructions - https://jadepuma.com/blogs/shopify-tutorials/collection-content-review-tool
+Last editted - 18Sep22
+ 
+{% endcomment %}
+
 {%- assign id = section.id -%}
 
 {% comment %} Section specific CSS {% endcomment %}
@@ -119,11 +127,8 @@ id: id
             <h4>Collection Description</h4>
             <p>{{ collection.description }}</p>
           {% endif %}
-            
-            {% endif %}
         
         {% endfor %}        
-
 
         <div class="container container--pagination">
           <div class="one-whole column text-align-center">
@@ -144,7 +149,6 @@ id: id
   </div>
 
 </section>
-
 
 {% schema %}
 {
@@ -176,7 +180,6 @@ id: id
         "label": "Show collection description",
         "default": true
       },
-
 {
 "type": "header",
 "content": "Layout"
