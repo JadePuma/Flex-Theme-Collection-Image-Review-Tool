@@ -24,13 +24,14 @@ width: 50%;
 
   .no-photo { color: red; font-size: 38px; }
   .pagination-list li::marker { display: none; color: white; }
-  .photo { height: 640px; 
+  .photo { height: 600px; 
           width: 520px; 
           background-color: #eeeeee;    
           display: flex;
    flex-direction: row;
    align-items: center;
    justify-content: center;}
+  .collection-title { background-color: {{ section.settings.headings-background-color }}; padding-left: 15px; }
 
     .aspect-ratio-good { background-color: #c3f6c3; }
     .aspect-ratio-bad { background-color: #f6c3dd; }
@@ -71,6 +72,12 @@ id: id
               {% endif %}">
     <div class="one-whole column content">
 
+      {% render 'heading',
+              title: page.title,
+      heading_tag: 'h1',
+      context: 'page',
+      text_alignment: section.settings.heading_alignment
+      %}
       <div class="product-photos">
 
         {% paginate collections by 48 %}
@@ -78,7 +85,7 @@ id: id
         {% for collection in collections %}
         {% assign aspect-ratio = collection.image.aspect_ratio | times: 1 | round: 3 %}
         {% assign aspect-ratio-featured = collection.featured_image.aspect_ratio | times: 1 | round: 3 %}
-        <h3><a href="/admin/collections/{{collection.id}}" target="_blank">{{collection.title}}</a></h3>
+        <h3 class='collection-title'><a href="/admin/collections/{{collection.id}}" target="_blank">{{collection.title}}</a></h3>
         <div class="photos">
           <div class="photo {% if collection.image %}{% if aspect-ratio == 1.000 %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}{% endif %}">
           <h3>{% raw %}{{ collection.image }}{% endraw %}</h3>
@@ -107,6 +114,14 @@ id: id
               {% endif %}
           </div>
         </div>
+          
+          {% if section.settings.show_description and collection.description != blank %}
+            <h4>Collection Description</h4>
+            <p>{{ collection.description }}</p>
+          {% endif %}
+            
+            {% endif %}
+        
         {% endfor %}        
 
 
@@ -133,13 +148,9 @@ id: id
 
 {% schema %}
 {
-"name": "Collection photos",
+"name": "Collection content",
 "class": "product-photos-section overlaid-header-option",
 "settings": [
-{
-"type": "header",
-"content": "Section headings"
-},
 {
 "type": "color",
 "id": "text-color",
@@ -147,11 +158,24 @@ id: id
 },
 {
 "type": "color",
-"id": "photos-background-color",
-"label": "Background"
+"id": "headings-background-color",
+"label": "Collection title background"
 },
-
-
+{
+"type": "color",
+"id": "photos-background-color",
+"label": "Photos background"
+},
+{
+"type": "header",
+"content": "Content"
+},
+      {
+        "type": "checkbox",
+        "id": "show_description",
+        "label": "Show collection description",
+        "default": true
+      },
 
 {
 "type": "header",
@@ -271,7 +295,7 @@ id: id
 ],
 
 "presets": [{
-"name": "Collection photos",
+"name": "Collection content",
 "category": "JadePuma"
 }]
 }
