@@ -1,306 +1,230 @@
-{% comment %}
- 
-Custom section created by JadePuma
-Instructions - https://jadepuma.com/blogs/shopify-tutorials/collection-content-review-tool
-Last editted - 18Sep22
- 
+{% comment %} 
+      JP Collection Image Review Tool
+      Last editted - 6/1/24
 {% endcomment %}
-
-{%- assign id = section.id -%}
-
-{% comment %} Section specific CSS {% endcomment %}
-{%- capture section_css -%}
-
-.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
-.photo { display: flex; flex-direction: column; margin: 10px; }
-.photo div { color: {{ section.settings.text-color }}; }
-
-{%- endcapture -%}
+{% liquid
+  assign b = section
+  assign bs = section.settings
+  assign img_target = bs.img_target | plus: 0
+%}
 
 {% style %}
-#shopify-section-{{ id }} {
-padding-top: {{ section.settings.padding_top }}px;
-padding-bottom: {{ section.settings.padding_bottom }}px;
-padding-left: {{ section.settings.padding_left }}px;
-padding-right: {{ section.settings.padding_right }}px;
-{% if section.settings.width == 'wide' %}
-width: 100%;
-{% elsif section.settings.width == 'half' %}
-width: 50%;
-{% endif %}
+  #jp-section-{{ b.id }} {}
+
+#jp-section-{{ b.id }}
+.photos {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  flex-wrap: nowrap;
+  justify-content: center;
 }
 
-  .no-photo { color: red; font-size: 38px; }
-  .pagination-list li::marker { display: none; color: white; }
-  .photo { height: 600px; 
-          width: 520px; 
-          background-color: #eeeeee;    
-          display: flex;
-   flex-direction: row;
-   align-items: center;
-   justify-content: center;}
-  .collection-title { background-color: {{ section.settings.headings-background-color }}; padding-left: 15px; }
+#jp-section-{{ b.id }}
+.no-photo {
+  color: red;
+  font-size: 38px;
+}
+#jp-section-{{ b.id }}
+.pagination-list li::marker {
+  display: none;
+  color: white;
+}
+#jp-section-{{ b.id }}
+.photo {
+  min-height: inherit;
+  height: fit-content;
+  max-height: 800px;
+  width: 520px;
+  background-color: #eeeeee;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+#jp-section-{{ b.id }}
+.collection-title {
+  padding-left: 15px;
+}
 
-    .aspect-ratio-good { background-color: #c3f6c3; }
-    .aspect-ratio-bad { background-color: #f6c3dd; }
+#jp-section-{{ b.id }}
+.aspect-ratio-good {
+  background-color: #c3f6c3;
+}
+#jp-section-{{ b.id }}
+.aspect-ratio-bad {
+  background-color: #f6c3dd;
+}
 
-{%
-    render 'css-loop',
-css: section_css,
-id: id
-%}
-
-{%
-    render 'css-loop',
-css: section.settings.custom_css,
-id: id
-%}
-
+ul.pagination-list li:first-child {
+  margin-top: 0.25em;
+}
 {% endstyle %}
 
 {% comment %} HTML markup {% endcomment %}
-<section class="featured-video
-                section
-                {{ section.settings.css_class }}
-                is-width-{{ section.settings.width }}
-                {% if section.settings.mobile_text_below_video == true %}
-                mobile-text--below-media
-                {% else %}
-                mobile-text--over-media
-                {% endif %}
-                {% if video_exists %} has-video-added {% endif %}
-                video-controls-enabled--{{ section.settings.controls }}"
-         {% if section.settings.animation != "none" %}
-         data-scroll-class="{{ section.settings.animation }}"
-         {% endif %}>
-  <div class="container
-              video__container
-              {% if section.settings.width == 'wide' or section.settings.width == 'half' %}
-              equal-columns--outside-trim
-              {% endif %}">
+<section id="jp-section-{{ b.id }}" class="
+    featured-video
+    section
+    is-width-standard
+    mobile-text--over-media
+    has-padding-top
+    has-padding-bottom
+  ">
+  <div class="
+      container
+      video__container
+      equal-columns--outside-trim
+    ">
     <div class="one-whole column content">
+      <h2 class="desired-AR-text">Target Aspect Ratio - {{ img_target }}</h2>
+      <div id="collection-photos" class="collection-photos">
+        {% paginate collections by bs.pagination_limit %}
+          {% for collection in collections %}
+            {% assign noColImg = false %}
+            {% assign aspect-ratio = collection.image.aspect_ratio | times: 1 | round: 3 %}
+            {% assign aspect-ratio-featured = collection.featured_image.aspect_ratio | times: 1 | round: 3 %}
+            <div class="">
+              <h3>
+                <a href="/admin/collections/{{collection.id}}" target="_blank">{{ collection.title }}</a>
+              </h3>
+            </div>
 
-      {% render 'heading',
-              title: page.title,
-      heading_tag: 'h1',
-      context: 'page',
-      text_alignment: section.settings.heading_alignment
-      %}
-      <div class="product-photos">
+            <div class="photos">
+              <div class="photo {% if collection.image %}{% if aspect-ratio == img_target %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}{% endif %}" data-url="/admin/collections/{{collection.id}}">
+                <h3>
+                  Collection Image
+                </h3>
+                {% if collection.image %}
+                  <div><img src="{{ collection.image.src | img_url: '500x500' }}"></div>
+                  <div>Dimensions: {{ collection.image.height }}px X {{ collection.image.width }}px</div>
+                  <div>Aspect Ratio: {{ aspect-ratio }}</div>
+                  {% if aspect-ratio > img_target %}
+                    <div>Need to crop sides</div>
+                  {% elsif aspect-ratio < img_target %}
+                    <div>Need to crop top and bottom</div>
+                  {% endif %}
+                {% else %}
 
-        {% paginate collections by 48 %}
-          
-        {% for collection in collections %}
-        {% assign aspect-ratio = collection.image.aspect_ratio | times: 1 | round: 3 %}
-        {% assign aspect-ratio-featured = collection.featured_image.aspect_ratio | times: 1 | round: 3 %}
-        <h3 class='collection-title'><a href="/admin/collections/{{collection.id}}" target="_blank">{{collection.title}}</a></h3>
-        <div class="photos">
-          <div class="photo {% if collection.image %}{% if aspect-ratio == 1.000 %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}{% endif %}">
-          <h3>{% raw %}{{ collection.image }}{% endraw %}</h3>
-            {% if collection.image %}
-            <div><img src="{{ collection.image.src | img_url: '500x500' }}"></div>
-            <div>Dimensions: {{ collection.image.height }}px X {{ collection.image.width }}px</div>
-            <div>Aspect Ratio: {{ aspect-ratio }}</div>
-                        {% if aspect-ratio > 1.000 %}
-              <div>Need to crop sides</div>
-            {%  elsif aspect-ratio < 1.000 %}
-              <div>Need to crop top and bottom</div>
+                  {% assign noColImg = true %}
+                  <p class="no-photo">No Collection Image</p>
+                {% endif %}
+              </div>
+
+
+              {% assign firstProductId = "" %}
+              {% if noColImg %}
+                {% if collection.products.size > 0 %}
+                  {% assign first_product = collection.products.first %}
+                  {% if first_product %}
+                    {% assign firstProductId = first_product.id %}
+                  {% else %}
+                    {% assign noColImg = false %}
+                  {% endif %}
+                {% else %}
+                  {% assign noColImg = false %}
+                {% endif %}
               {% endif %}
-              {% else %}
-              <p class="no-photo">No Collection Image</p>
-              {% endif %}
-          </div>
-          <div class="photo {% if aspect-ratio-featured == 1.000 %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}">
-            <h3>{% raw %}{{ collection.featured_image }}{% endraw %}</h3>
-            <div><img src="{{ collection.featured_image.src | img_url: '500x500' }}"></div>
-            <div>Dimensions: {{ collection.featured_image.height }}px X {{ collection.featured_image.width }}px</div>
-            <div>Aspect Ratio: {{ collection.featured_image.aspect_ratio | round: 3 }}</div>
-                        {% if aspect-ratio-featured > 1.0 %}
-              <div>Need to crop sides</div>
-            {%  elsif aspect-ratio-featured < 1.0 %}
-              <div>Need to crop top and bottom</div>
-              {% endif %}
-          </div>
-        </div>
-          
-          {% if section.settings.show_description and collection.description != blank %}
-            <h4>Collection Description</h4>
-            <p>{{ collection.description }}</p>
-          {% endif %}
-        
-        {% endfor %}        
 
-        <div class="container container--pagination">
-          <div class="one-whole column text-align-center">
-            {%- assign load_more_text = 'collections.general.pagination_button' | t -%}
-            {% render 'pagination',
-                  paginate: paginate,
-            pagination_type: basic_pagination,
-            load_more_text: load_more_text
-            %}
-          </div>
-        </div>    
 
+              <div class="photo text-align-center {% if aspect-ratio-featured == img_target %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}" data-url="{% if noColImg == true %}/admin/products/{{ firstProductId }}{% else %}/admin/collections/{{collection.id}}{% endif %}">
+                <h3>
+                  <a href="{% if noColImg == true %}/admin/products/{{ firstProductId }}{% else %}/admin/collections/{{collection.id}}{% endif %}">Collection Featured Image</a>
+                </h3>
+
+                {% if collection.featured_image %}
+                  <div><img src="{{ collection.featured_image.src | img_url: '500x500' }}"></div>
+                  <div>
+                    Dimensions: {{ collection.featured_image.height }}px X {{ collection.featured_image.width }}px
+                  </div>
+                  <div>Aspect Ratio: {{ collection.featured_image.aspect_ratio | round: 3 }}</div>
+                  {% if aspect-ratio-featured > img_target %}
+                    <div>{{ bs.instructions-too-wide }}</div>
+                  {% elsif aspect-ratio-featured < img_target %}
+                    <div>{{ bs.instructions-too-tall }}</div>
+                  {% endif %}
+                {% else %}
+
+
+                  <p class="no-photo text-align-center">No Collection Featured Image</p>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if bs.show_description and collection.description != blank %}
+              <div class="has-margin-bottom has-padding-bottom ">
+                <h4>Collection Description</h4>
+                <p>{{ collection.description }}</p>
+              </div>
+
+            {% endif %}
+          {% endfor %}
+          {% render 'pagination', paginate: paginate %}
         {% endpaginate %}
-
-      </div> 
-
+      </div>
     </div>
   </div>
-
 </section>
 
+<script>
+  document.getElementById('collection-photos').addEventListener('click', (e) => {
+        let targetElement = e.target;
+        while (targetElement != null && !targetElement.classList.contains('photo')) {
+      targetElement = targetElement.parentNode;
+    }
+  
+    // If a matching element was found and it has a data-url attribute, redirect
+    if (targetElement && targetElement.dataset.url) {
+      window.open(targetElement.dataset.url, '_blank');
+    }
+  })
+</script>
+
 {% schema %}
-{
-"name": "JP Collection content",
-"class": "product-photos-section overlaid-header-option",
-"settings": [
-{
-"type": "color",
-"id": "text-color",
-"label": "Text"
-},
-{
-"type": "color",
-"id": "headings-background-color",
-"label": "Collection title background"
-},
-{
-"type": "color",
-"id": "photos-background-color",
-"label": "Photos background"
-},
-{
-"type": "header",
-"content": "Content"
-},
+  {
+    "name": "JP Collection Images Tool",
+    "class": "product-photos-section overlaid-header-option",
+    "settings": [
+      {
+        "type": "range",
+        "id": "pagination_limit",
+        "label": "Collections per page",
+        "min": 10,
+        "max": 500,
+        "step": 10,
+        "default": 250,
+        "info": "Decrease this if the page is taking to long to load."
+      },
       {
         "type": "checkbox",
         "id": "show_description",
         "label": "Show collection description",
         "default": true
       },
-{
-"type": "header",
-"content": "Layout"
-},
-{
-"type": "select",
-"id": "width",
-"label": "Width",
-"default": "standard",
-"options": [
-{
-"value": "half",
-"label": "Half"
-},
-{
-"value": "standard",
-"label": "Standard"
-},
-{
-"value": "wide",
-"label": "Wide"
-}
-]
-},
-{
-"type": "range",
-"id": "padding_top",
-"label": "Top spacing",
-"min": 0,
-"max": 80,
-"default": 20,
-"unit": "px"
-},
-{
-"type": "range",
-"id": "padding_bottom",
-"label": "Bottom spacing",
-"min": 0,
-"max": 80,
-"default": 0,
-"unit": "px"
-},
-{
-"type": "range",
-"id": "padding_left",
-"label": "Left spacing",
-"min": 0,
-"max": 80,
-"default": 0,
-"unit": "px"
-},
-{
-"type": "range",
-"id": "padding_right",
-"label": "Right spacing",
-"default": 0,
-"min": 0,
-"max": 80,
-"unit": "px"
-},
-{
-"type": "select",
-"id": "animation",
-"label": "Animation",
-"default": "none",
-"options": [
-{
-"value": "none",
-"label": "None"
-},
-{
-"value": "fadeIn",
-"label": "Fade in"
-},
-{
-"value": "fadeInDown",
-"label": "Fade in down"
-},
-{
-"value": "fadeInLeft",
-"label": "Fade in left"
-},
-{
-"value": "fadeInRight",
-"label": "Fade in right"
-},
-{
-"value": "slideInLeft",
-"label": "Slide in left"
-},
-{
-"value": "slideInRight",
-"label": "Slide in right"
-},
-{
-"value": "zoomIn",
-"label": "Zoom in"
-}
-]
-},
-{
-"type": "header",
-"content": "Advanced",
-"info": "[Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360022329373)"
-},
-{
-"type": "text",
-"id": "css_class",
-"label": "CSS Class"
-},
-{
-"type": "textarea",
-"id": "custom_css",
-"label": "Custom CSS"
-}
-],
-
-"presets": [{
-"name": "JP Collection content",
-"category": "JadePuma"
-}]
-}
-
+      {
+        "type": "header",
+        "content": "Content"
+      },
+      {
+        "type": "text",
+        "id": "img_target",
+        "label": "Target Aspect Ratio",
+        "default": "1.0",
+        "info": "If AR is less than 1 there must be a 0 before the decimal (e.g. 0.1 NOT .1)."
+      },
+      {
+        "type": "textarea",
+        "id": "instructions-too-tall",
+        "label": "Instructions when image is too tall",
+        "default": "Add padding to sides"
+      },
+      {
+        "type": "textarea",
+        "id": "instructions-too-wide",
+        "label": "Instructions when image is too wide",
+        "default": "Add padding to top and bottom"
+      }
+    ]
+  }
 {% endschema %}
