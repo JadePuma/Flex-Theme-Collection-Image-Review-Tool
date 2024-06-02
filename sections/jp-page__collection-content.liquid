@@ -85,7 +85,7 @@ ul.pagination-list li:first-child {
             {% assign noColImg = false %}
             {% assign aspect-ratio = collection.image.aspect_ratio | times: 1 | round: 3 %}
             {% assign aspect-ratio-featured = collection.featured_image.aspect_ratio | times: 1 | round: 3 %}
-            <div class="">
+            <div class="has-margin-top has-padding-top" style="margin-top:20px;">
               <h3>
                 <a href="/admin/collections/{{collection.id}}" target="_blank">{{ collection.title }}</a>
               </h3>
