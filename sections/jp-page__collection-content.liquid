@@ -79,6 +79,7 @@ ul.pagination-list li:first-child {
     ">
     <div class="one-whole column content">
       <h2 class="desired-AR-text">Target Aspect Ratio - {{ img_target }}</h2>
+      <p>If the collection has an image assigned, it will show as the Collection Image and the Collection Featured Image below.  If no collection image is assigned, then the Collection Featured Image is pulled in from the first product photo of the first product from the default sort order of the collection.</p>
       <div id="collection-photos" class="collection-photos">
         {% paginate collections by bs.pagination_limit %}
           {% for collection in collections %}
@@ -186,6 +187,10 @@ ul.pagination-list li:first-child {
     "name": "JP Collection Images Tool",
     "class": "product-photos-section overlaid-header-option",
     "settings": [
+      {
+        "type": "paragraph",
+        "content": "[See demo](https://flexthemesections.com/pages/jp-collection-image-review-tool)"
+      },
       {
         "type": "range",
         "id": "pagination_limit",
